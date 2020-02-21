@@ -49,13 +49,7 @@ class Usuario {
 
 		if(count($results) > 0){
 
-			$row = $results[0];
-
-			$this->setIdusuario($row['idusuario']);
-			$this->setDeslogin($row['deslogin']);
-			$this->setDessenha($row['dessenha']);
-			$this->setDtcadastro(new DateTime($row['dtcadastro']));
-
+			$this->setData($results[0]);
 		}
 	}
 
@@ -71,8 +65,8 @@ class Usuario {
 		$sql = new Sql();
 
 		return $sql->select("SELECT * FROM tb_usuarios WHERE deslogin LIKE :SEARCH ORDER BY deslogin", array(
-			//Substitui o % por aspas simples para evitar sql injection. A classe irá substituir. 
-			//As aspas simples significam para o sql retornar tudo que contiver aquilo que esta entre elas.
+			//Para evitar sql injection a nossa classe irá substituir depois por aspas simples.
+			//O %a% significa para o sql retornar tudo que contiver 'a'.
 			':SEARCH'=>"%".$login."%"
 		));
 	}
@@ -88,18 +82,57 @@ class Usuario {
 
 		if(count($results) > 0){
 
-			$row = $results[0];
-
-			$this->setIdusuario($row['idusuario']);
-			$this->setDeslogin($row['deslogin']);
-			$this->setDessenha($row['dessenha']);
-			$this->setDtcadastro(new DateTime($row['dtcadastro']));
+			$this->setData($results[0]);
+		
 
 		} else {
 
 			throw new Exception("Login e/ou senha inválidos!");
 			
 		}
+	}
+
+	public function setData($data){
+
+		$this->setIdusuario($data['idusuario']);
+		$this->setDeslogin($data['deslogin']);
+		$this->setDessenha($data['dessenha']);
+		$this->setDtcadastro(new DateTime($data['dtcadastro']));
+	}
+
+	public function insert(){
+
+		$sql = new Sql();
+
+		$results = $sql->select("CALL sp_usuarios_insert(:LOGIN, :PASSWORD)", array(
+			':LOGIN'=>$this->getDeslogin(),
+			':PASSWORD'=>$this->getDessenha()
+		));
+
+		if(count($results) > 0){
+			$this->setData($results[0]);
+		} 
+	}
+
+	public function update($login, $password){
+
+		$this->setDeslogin($login);
+		$this->setDessenha($password);
+
+		$sql = new Sql();
+
+		$sql->query("UPDATE tb_usuarios SET deslogin = :LOGIN, dessenha = :PASSWORD WHERE idusuario = :ID", array(
+			':LOGIN'=>$this->getDeslogin(),
+			':PASSWORD'=>$this->getDessenha(),
+			':ID'=>$this->getIdusuario()
+		));
+
+	}
+
+	public function __construct($login = "", $password = ""){
+		//Acima, se não chamar o construtor não tem problema, fica vazio.
+		$this->setDeslogin($login);
+		$this->setDessenha($password);
 	}
 
 	public function __toString(){
