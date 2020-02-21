@@ -31,10 +31,16 @@ echo json_encode($usuarios);
 //$aluno->insert();
 //echo $aluno;
 
-//Modificando um usuário
+//Alterar um usuário
+//$usuario = new Usuario();
+//$usuario->loadById(4);
+//$usuario->update("roberto planta", "hahahaha");
+//echo $usuario;
+
+
 $usuario = new Usuario();
-$usuario->loadById(4);
-$usuario->update("roberto planta", "hahahaha");
+$usuario->loadById($a);
+$usuario->delete();
 echo $usuario;
 
 ?>
